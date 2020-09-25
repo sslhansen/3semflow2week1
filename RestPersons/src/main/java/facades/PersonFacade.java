@@ -110,7 +110,7 @@ public class PersonFacade implements IPersonFacade {
             em.getTransaction().begin();
             Person p1 = em.find(Person.class, id);
             if (p1 == null) {
-                throw new PersonNotFoundException("No person with provided id found");
+                throw new PersonNotFoundException("No person with provided id foundd");
             } else {
                 pDTO = new PersonDTO(p1);
                 em.getTransaction().commit();
