@@ -2,6 +2,7 @@ package facades;
 
 import dto.PersonDTO;
 import dto.PersonsDTO;
+import entities.Address;
 import entities.Person;
 import exceptions.MissingInputException;
 import exceptions.PersonNotFoundException;
@@ -57,9 +58,18 @@ public class PersonFacade implements IPersonFacade {
         EntityManager em = getEntityManager();
         try {
             em.getTransaction().begin();
-            em.persist(new Person("John", "Svendsen", "12121212"));
-            em.persist(new Person("John", "Klausen", "13131313"));
-            em.persist(new Person("John", "Henriksen", "13541121"));
+            Address a1 = new Address("Fiskevej 1", 2000, "Frederiksberg");
+            Address a2 = new Address("Sverigevej 1", 3400, "Hillerød");
+            Address a3 = new Address("Hejvej 1", 3050, "Humlebæk");
+            Person p1 = new Person("John", "Svendsen", "12121212");
+            Person p2 = new Person("John", "Klausen", "13131313");
+            Person p3 = new Person("John", "Henriksen", "13541121");
+            p1.setAddress(a1);
+            p2.setAddress(a2);
+            p3.setAddress(a3);
+            em.persist(p1);
+            em.persist(p2);
+            em.persist(p3);
             em.getTransaction().commit();
         } finally {
             em.close();
@@ -67,20 +77,30 @@ public class PersonFacade implements IPersonFacade {
     }
 
     @Override
-    public PersonDTO addPerson(String fName, String lName, String phone) throws MissingInputException {
+    public PersonDTO addPerson(String fName, String lName, String phone, String street, int zip, String city) throws MissingInputException {
         if (fName == null || lName == null) {
             throw new MissingInputException("First Name and/or Last Name is missing");
         } else {
             EntityManager em = getEntityManager();
-            Person p = new Person(fName, lName, phone);
             try {
                 em.getTransaction().begin();
+                Person p = new Person(fName, lName, phone);
+                TypedQuery q1 = em.createQuery("SELECT a FROM Address a WHERE a.street = :street AND a.zip = :zip AND a.city = :city", Address.class);
+                q1.setParameter("street", street);
+                q1.setParameter("zip", zip);
+                q1.setParameter("city", city);
+                List<Address> addr = q1.getResultList();
+                if (addr.size() > 0) {
+                    p.setAddress(addr.get(0));
+                } else {
+                    p.setAddress(new Address(street, zip, city));
+                }
                 em.persist(p);
                 em.getTransaction().commit();
+                return new PersonDTO(p);
             } finally {
                 em.close();
             }
-            return new PersonDTO(p);
         }
     }
 
@@ -93,10 +113,19 @@ public class PersonFacade implements IPersonFacade {
                 throw new PersonNotFoundException("Could not delete, provided id does not exist");
             } else {
                 em.getTransaction().begin();
-                em.remove(p1);
+                TypedQuery q1 = em.createQuery("SELECT e FROM Person e WHERE e.address.id = :id", Person.class);
+                q1.setParameter("id", p1.getAddress().getId());
+                List<Person> persons = q1.getResultList();
+                if (persons.size() > 1) {
+                    em.remove(p1);
+                } else {
+                    em.remove(p1);
+                    em.remove(p1.getAddress());
+                }
                 em.getTransaction().commit();
                 return new PersonDTO(p1);
             }
+
         } finally {
             em.close();
         }

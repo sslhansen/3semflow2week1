@@ -2,11 +2,14 @@ package entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -21,6 +24,20 @@ public class Person implements Serializable {
     private String firstName;
     private String lastName;
     private String phone;
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    private Address address;
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+        if (address != null) {
+            address.getPersons().add(this);
+        }
+    }
 
     public String getFirstName() {
         return firstName;
