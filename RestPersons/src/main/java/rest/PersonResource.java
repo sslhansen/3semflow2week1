@@ -95,7 +95,7 @@ public class PersonResource {
     @PUT
     @Produces({MediaType.APPLICATION_JSON})
     @Consumes({MediaType.APPLICATION_JSON})
-    public String editPerson(@PathParam("id") Long id, String person) {
+    public String editPerson(@PathParam("id") Long id, String person) throws PersonNotFoundException, MissingInputException {
         PersonDTO pDTO = GSON.fromJson(person, PersonDTO.class);
         pDTO.setId(id);
         PersonDTO pny = FACADE.editPerson(pDTO);

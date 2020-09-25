@@ -134,19 +134,28 @@ public class PersonFacade implements IPersonFacade {
     }
 
     @Override
-    public PersonDTO editPerson(PersonDTO p) {
+    public PersonDTO editPerson(PersonDTO p) throws PersonNotFoundException, MissingInputException {
         EntityManager em = getEntityManager();
-        try {
-            Person pers = em.find(Person.class, p.getId());
-            em.getTransaction().begin();
-            pers.setLastName(p.getlName());
-            pers.setFirstName(p.getfName());
-            pers.setPhone(p.getPhone());
-            em.getTransaction().commit();
-            return new PersonDTO(pers);
-        } finally {
-            em.close();
+        if (p.getfName().length() == 0 || p.getlName().length() == 0) {
+            throw new MissingInputException("First Name and/or Last Name is missing");
+        } else {
+            try {
+                Person pers = em.find(Person.class, p.getId());
+                if (pers == null) {
+                    throw new PersonNotFoundException("The person you are trying to edit is not found!");
+                } else {
+                    em.getTransaction().begin();
+                    pers.setLastName(p.getlName());
+                    pers.setFirstName(p.getfName());
+                    pers.setPhone(p.getPhone());
+                    em.getTransaction().commit();
+                    return new PersonDTO(pers);
+                }
+            } finally {
+                em.close();
+            }
         }
+
     }
 
 }

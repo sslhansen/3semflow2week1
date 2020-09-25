@@ -15,5 +15,5 @@ public interface IPersonFacade {
 
     public PersonsDTO getAllPersons();
 
-    public PersonDTO editPerson(PersonDTO p) throws PersonNotFoundException;
+    public PersonDTO editPerson(PersonDTO p) throws PersonNotFoundException, MissingInputException;
 }
