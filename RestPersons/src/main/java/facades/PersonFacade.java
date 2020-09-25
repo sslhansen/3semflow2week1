@@ -136,7 +136,7 @@ public class PersonFacade implements IPersonFacade {
     @Override
     public PersonDTO editPerson(PersonDTO p) throws PersonNotFoundException, MissingInputException {
         EntityManager em = getEntityManager();
-        if (p.getfName().length() == 0 || p.getlName().length() == 0) {
+        if (p.getfName() == null || p.getlName() == null || p.getfName().length() == 0 || p.getlName().length() == 0) {
             throw new MissingInputException("First Name and/or Last Name is missing");
         } else {
             try {
