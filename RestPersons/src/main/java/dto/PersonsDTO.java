@@ -15,6 +15,14 @@ import java.util.List;
  */
 public class PersonsDTO {
 
+    public List<PersonDTO> getAll() {
+        return all;
+    }
+
+    public void setAll(List<PersonDTO> all) {
+        this.all = all;
+    }
+
     List<PersonDTO> all = new ArrayList();
 
     public PersonsDTO(List<Person> personEntities) {
