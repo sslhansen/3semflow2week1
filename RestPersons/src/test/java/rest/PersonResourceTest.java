@@ -1,5 +1,6 @@
 package rest;
 
+import dto.PersonDTO;
 import entities.Address;
 import entities.Person;
 import utils.EMF_Creator;
@@ -7,22 +8,28 @@ import io.restassured.RestAssured;
 import static io.restassured.RestAssured.given;
 import io.restassured.parsing.Parser;
 import java.net.URI;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.ws.rs.core.UriBuilder;
 import org.glassfish.grizzly.http.server.HttpServer;
+import static org.glassfish.grizzly.http.util.Header.ContentType;
 import org.glassfish.grizzly.http.util.HttpStatus;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 //Uncomment the line below, to temporarily disable this test
 
-@Disabled
+//@Disabled
 public class PersonResourceTest {
 
     private static final int SERVER_PORT = 7777;
@@ -93,7 +100,7 @@ public class PersonResourceTest {
     @Test
     public void testServerIsUp() {
         System.out.println("Testing is server UP");
-        given().when().get("/persons").then().statusCode(200);
+        given().when().get("/person").then().statusCode(200);
     }
 
     //This test assumes the database contains two rows
@@ -101,7 +108,7 @@ public class PersonResourceTest {
     public void testDummyMsg() throws Exception {
         given()
                 .contentType("application/json")
-                .get("/persons/").then()
+                .get("/person/").then()
                 .assertThat()
                 .statusCode(HttpStatus.OK_200.getStatusCode())
                 .body("msg", equalTo("Hello World"));
@@ -116,4 +123,19 @@ public class PersonResourceTest {
                 .statusCode(HttpStatus.OK_200.getStatusCode())
                 .body("count", equalTo(3));
     }
+
+    @Test
+    public void getAllPersons() {
+        List<PersonDTO> personsDTOs;
+
+        personsDTOs = given()
+                .contentType("application/json")
+                .when()
+                .get("/person/all")
+                .then()
+                .extract().body().jsonPath().getList("all", PersonDTO.class);
+
+        assertEquals(3, personsDTOs.size());
+    }
+
 }
